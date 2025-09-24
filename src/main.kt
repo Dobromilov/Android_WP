@@ -1,50 +1,31 @@
-import kotlin.math.*
-import kotlin.random.Random
+package Inheritance
 
-class Human(
-    private var fullName: String,
-    private var age: Int,
-    private var currentSpeed: Double
-) {
-    private var x: Double = 0.0
-    private var y: Double = 0.0
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-    fun move() {
-        val angle = Random.nextDouble(0.0, 2 * PI)
-        x += currentSpeed * cos(angle)
-        y += currentSpeed * sin(angle)
-    }
-
-    fun getFullName() = fullName
-    fun setFullName(name: String) { fullName = name }
-    
-    fun getAge() = age
-    fun setAge(newAge: Int) { age = newAge }
-    
-    fun getCurrentSpeed() = currentSpeed
-    fun setCurrentSpeed(speed: Double) { currentSpeed = speed }
-    
-    fun getPosition() = "(${String.format("%.2f", x)}, ${String.format("%.2f", y)})"
-}
-
-fun main() {
+fun main() = runBlocking {
+    val mutex = Mutex()
     val humans = listOf(
-        Human("Погорелов Влад Батькович", 30, 12.0),
-        Human("Петров Роман Юрьевич", 25, 9.5),
-        Human("Иванова Мария Сергеевна", 28, 8.2),
-        Human("Сидоров Алексей Викторович", 35, 10.1),
-        Human("Козлова Анна Дмитриевна", 22, 7.8),
-        Human("Николаев Иван Петрович", 40, 11.5)
+        Human("Влад", "Погорелов", "Батькович", 9.0, 30),
+        Human("Роман", "Петров", "Юрьевич", 9.5, 25),
+        Human("Мария", "Иванова", "Сергеевна", 8.2, 28),
+        Driver("Алексей", "Сидоров", "Викторович", 8.0, 35, "Toyota")
     )
 
-    val simulationTime = 5 
-    val timeStep = 1.0 
-
-    repeat(simulationTime) { step ->
-        println("\nСекунда ${step + 1}:")
-        humans.forEach { human ->
-            human.move()
-            println("${human.getFullName()} переместился в позицию ${human.getPosition()}")
+    val jobs = humans.mapIndexed { index, human ->
+        launch(Dispatchers.Default) {
+            for (time in 1..5) {
+                print("Время: ${time}c")
+                mutex.withLock {
+                    print("${index + 1}): ")
+                    human.move()
+                }
+                delay(1000)
+            }
         }
     }
+
+    jobs.joinAll()
+    println()
 }
