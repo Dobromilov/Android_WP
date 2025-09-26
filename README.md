@@ -112,11 +112,10 @@ fun main() = runBlocking {
 
 ```
 src/
-├── main/kotlin/
-│   ├── main.kt          # Главная функция
-│   ├── Movable.kt       # Интерфейс Movable
-│   ├── Human.kt         # Класс Human
-│   └── Driver.kt        # Класс Driver
+├── main.kt          # Главная функция
+├── Movable.kt       # Интерфейс Movable
+├── Human.kt         # Класс Human
+└── Driver.kt        # Класс Driver
 ```
 
 Проект демонстрирует эффективное использование корутин для параллельного моделирования движения объектов с соблюдением принципов ООП.
