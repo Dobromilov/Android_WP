@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/currentLatitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Latitude(широта): -"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/currentLongitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Longitude(долгота): -"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/currentAltitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Altitude(высота): -"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/currentTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current Time: -"
+        android:textSize="18sp" />
+
+</LinearLayout>
