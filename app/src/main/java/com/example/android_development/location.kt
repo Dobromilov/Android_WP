@@ -1,5 +1,6 @@
 package com.example.android_development
 
+import java.io.File
 import android.Manifest
 import android.provider.Settings
 import android.content.Context
@@ -18,8 +19,22 @@ import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.FileOutputStream
+
 
 // https://tutorials.eu/integrating-location-services-in-your-android-app-day-11-android-14-masterclass/ - полезная инфа
+// https://habr.com/ru/companies/otus/articles/874812/?ysclid=mi868v0f2t278678114 - упаковка в json
+
+@Serializable
+data class Json_object(
+    val _Latitude: Double,
+    val _Longitude: Double,
+    val _Altitude: Double,
+    val _Time: Long,
+)
 
 class location : AppCompatActivity(), LocationListener {
 
@@ -32,6 +47,7 @@ class location : AppCompatActivity(), LocationListener {
     private lateinit var currentAltitude: TextView
     private lateinit var currentTime: TextView
     private lateinit var locationManager: LocationManager
+
 
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
@@ -107,6 +123,9 @@ class location : AppCompatActivity(), LocationListener {
         currentLongitude.text = "Longitude: ${location.longitude}"
         currentAltitude.text = "Altitude: ${location.altitude}"
         currentTime.text = "Time: ${formatTime(location.time)}"
+        var _json = Json_object(location.latitude, location.longitude, location.altitude, location.time)
+        val jsonString = Json.encodeToString(_json)
+        WritingToJson(jsonString)
     }
 
     override fun onLocationChanged(location: Location) {
@@ -131,6 +150,17 @@ class location : AppCompatActivity(), LocationListener {
         val date = Date(timeInMillis)
         val format = SimpleDateFormat("HH:mm:ss         dd.MM.yyyy", Locale.getDefault())
         return format.format(date)
+    }
+
+    fun WritingToJson(_Json : String){
+        try {
+            val file = File(filesDir, "location_data.json")
+            FileOutputStream(file, true).use { outputStream ->
+                outputStream.write("$_Json\n".toByteArray())
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun isLocationEnable(): Boolean {
