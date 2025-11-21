@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.FileOutputStream
-
+import android.os.Environment
 
 // https://tutorials.eu/integrating-location-services-in-your-android-app-day-11-android-14-masterclass/ - полезная инфа
 // https://habr.com/ru/companies/otus/articles/874812/?ysclid=mi868v0f2t278678114 - упаковка в json
@@ -152,11 +152,15 @@ class location : AppCompatActivity(), LocationListener {
         return format.format(date)
     }
 
-    fun WritingToJson(_Json : String){
+    fun WritingToJson(jsonString: String) {
         try {
-            val file = File(filesDir, "location_data.json")
+            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!path.exists()) {
+                path.mkdirs()
+            }
+            val file = File(path, "location_data.json")
             FileOutputStream(file, true).use { outputStream ->
-                outputStream.write("$_Json\n".toByteArray())
+                outputStream.write("$jsonString\n".toByteArray())
             }
         } catch (e: Exception) {
             e.printStackTrace()
