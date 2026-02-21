@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         val bt_calc = findViewById<Button>(R.id.button1)
         val bt_media_player = findViewById<Button>(R.id.button2)
         val bt_location = findViewById<Button>(R.id.button3)
+        val bt_location_server = findViewById<Button>(R.id.button4)
 
 
         bt_calc.setOnClickListener ({
@@ -38,6 +39,11 @@ class MainActivity : AppCompatActivity() {
         bt_location.setOnClickListener ({
             val locationIntent = Intent(this, location::class.java)
             startActivity(locationIntent)
+        })
+
+        bt_location_server.setOnClickListener ({
+            val LocationServerIntent = Intent(this, LocationServer::class.java)
+            startActivity(LocationServerIntent)
         })
     }
 }
