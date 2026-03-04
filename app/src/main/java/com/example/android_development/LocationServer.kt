@@ -26,16 +26,32 @@ import java.util.concurrent.atomic.AtomicReference
 
 @Serializable
 data class Json_obj(
-    val _Latitude: Double,
-    val _Longitude: Double,
-    val _Altitude: Double,
+    val _Latitude: Double? = null,
+    val _Longitude: Double? = null,
+    val _Altitude: Double? = null,
     val _Time: Long,
+)
+
+@Serializable
+data class ServerCommand(
+    val f_lat: Boolean = true,
+    val f_lon: Boolean = true,
+    val f_alt: Boolean = true
 )
 
 class LocationServer : AppCompatActivity() {
 
     companion object {
         private const val PERMISSION_REQUEST_ACCESS_LOCATION = 100
+    }
+
+    private var canSendLat = true
+    private var canSendLon = true
+    private var canSendAlt = true
+
+    val jsonConfig = Json {
+        encodeDefaults = false
+        explicitNulls = false
     }
 
     private lateinit var tvStatus: TextView
@@ -126,23 +142,42 @@ class LocationServer : AppCompatActivity() {
             try {
                 val context = ZContext()
                 val socket = context.createSocket(SocketType.REQ)
-                socket.connect("tcp://127.0.0.1:7777")
+                socket.connect("tcp://192.168.0.15:7777")
 
                 Log.d("ZMQ", "Подключено к серверу")
 
                 while (isRunning) {
                     val location = lastLocation.get()
                     if (location != null) {
-                        val jsonObject = Json_obj(location.latitude, location.longitude, location.altitude, location.time)
-                        val jsonString = Json.encodeToString(jsonObject)
-                        Log.d("ZMQ", "Отправка: $jsonString")
+                        val dataPacket = Json_obj(
+                            _Latitude = if (canSendLat) location.latitude else null,
+                            _Longitude = if (canSendLon) location.longitude else null,
+                            _Altitude = if (canSendAlt) location.altitude else null,
+                            _Time = location.time
+                        )
+                        val jsonString = jsonConfig.encodeToString(dataPacket)
+                        Log.d("ZMQ", "Отправка (байт: ${jsonString.length}): $jsonString")
                         socket.send(jsonString.toByteArray(ZMQ.CHARSET), 0)
+
                         val reply = socket.recv(0)
-                        Log.d("ZMQ", "Получен ответ: ${String(reply, ZMQ.CHARSET)}")
+                        if (reply != null) {
+                            val replyStr = String(reply, ZMQ.CHARSET)
+                            try {
+                                val commands = Json.decodeFromString<ServerCommand>(replyStr)
+
+                                canSendLat = commands.f_lat
+                                canSendLon = commands.f_lon
+                                canSendAlt = commands.f_alt
+
+                                Log.d("ZMQ", "Фильтры обновлены: Lat=$canSendLat, Lon=$canSendLon, Alt=$canSendAlt")
+                            } catch (e: Exception) {
+                                Log.e("ZMQ", "Ошибка парсинга ответа сервера: ${e.message}")
+                            }
+                        }
                     } else {
                         Log.d("ZMQ", "Местоположение еще не получено")
                     }
-                    Thread.sleep(1000)
+                    Thread.sleep(4000)
                 }
 
                 socket.close()
